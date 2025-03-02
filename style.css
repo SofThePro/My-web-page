@@ -1,65 +1,61 @@
-/*style.css*/
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 body {
+    background-color: black;
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    text-align: center;
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-family: sans-serif;
-    line-height: 1.5;
-    min-height: 100vh;
-    background: #f3f3f3;
-    flex-direction: column;
+    align-items: center;
+    height: 100vh;
     margin: 0;
 }
 
-.main {
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    padding: 10px 20px;
-    transition: transform 0.2s;
-    width: 500px;
-    text-align: center;
-}
-
-h1 {
-    color: #4CAF50;
-}
-
-label {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    text-align: left;
-    color: #555;
-    font-weight: bold;
+.login-container {
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #00ff00;
+    animation: glitch 1s infinite;
 }
 
 input {
-    display: block;
-    width: 100%;
-    margin-bottom: 15px;
+    background: black;
+    border: 1px solid #00ff00;
+    color: #00ff00;
     padding: 10px;
-    box-sizing: border-box;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    margin: 10px 0;
+    width: 80%;
+    text-align: center;
 }
 
 button {
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-    margin-bottom: 15px;
+    background: #00ff00;
     border: none;
-    color: white;
+    padding: 10px;
+    width: 80%;
     cursor: pointer;
-    background-color: #4CAF50;
-    width: 100%;
-    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
 }
 
-.wrap {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+button:hover {
+    background: #008800;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+@keyframes glitch {
+    0% {
+        text-shadow: 2px 2px 0 #00ff00, -2px -2px 0 #00ff00;
+    }
+
+    50% {
+        text-shadow: -2px -2px 0 #00ff00, 2px 2px 0 #00ff00;
+    }
+
+    100% {
+        text-shadow: 2px 2px 0 #00ff00, -2px -2px 0 #00ff00;
+    }
 }
