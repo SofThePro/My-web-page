@@ -4,6 +4,8 @@ body {
 
 .box1-with-transition {
     background-color: red;
+    height: 150px;
+    widht: 150px;
     border: solid black 3px;
     border-radius: 3px;
     transition: all 1s ease-in-out;
@@ -15,6 +17,8 @@ body {
 
 .box1-without-transition {
     background-color: red;
+    height: 150px;
+    widht: 150px;
     border: solid black 3px;
     border-radius: 3px;
 }
