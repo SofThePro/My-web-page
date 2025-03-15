@@ -1,3 +1,6 @@
-.box1{
-    background-color: red;
+.box1 {
+  background-color: red;
+  width: 150px;
+  height: 150px;
+  transition: all 1s ease-in-out;
 }
