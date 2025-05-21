@@ -2,17 +2,103 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Click the Box Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      background: #e2e2e2;
+      overflow: hidden;
+    }
+    #box {
+      width: 50px;
+      height: 50px;
+      background: red;
+      position: absolute;
+      cursor: pointer;
+    }
+    #scoreBoard {
+      font-size: 1.5rem;
+      margin: 1rem 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      margin: 1rem;
+    }
+  </style>
 </head>
 <body>
+  <h1>🎯 Click the Box!</h1>
+  <div id="scoreBoard">Score: 0 | Time: 15</div>
+  <button onclick="startGame()">Start Game</button>
+  <div id="gameArea">
+    <div id="box" onclick="scorePoint()"></div>
+  </div>
 
-  <div class="button" id="button">this is a div</div>
+  <script>
+    let score = 0;
+    let timeLeft = 15;
+    let gameInterval;
+    let timerInterval;
 
-  <input type="button" class="button1" id="button1">
+    const box = document.getElementById('box');
+    const scoreBoard = document.getElementById('scoreBoard');
+    const gameArea = document.getElementById('gameArea');
 
-  <p>this &#8593 is a input</p>
-  
+    function randomPosition() {
+      const maxX = gameArea.clientWidth - box.clientWidth;
+      const maxY = gameArea.clientHeight - box.clientHeight;
+      const x = Math.floor(Math.random() * maxX);
+      const y = Math.floor(Math.random() * maxY);
+      box.style.left = x + 'px';
+      box.style.top = y + 'px';
+    }
+
+    function scorePoint() {
+      score++;
+      updateScore();
+      randomPosition();
+    }
+
+    function updateScore() {
+      scoreBoard.textContent = `Score: ${score} | Time: ${timeLeft}`;
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 15;
+      updateScore();
+      randomPosition();
+      box.style.display = 'block';
+
+      gameInterval = setInterval(randomPosition, 1000);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateScore();
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(gameInterval);
+      clearInterval(timerInterval);
+      box.style.display = 'none';
+      alert('Time\'s up! Your score: ' + score);
+    }
+
+    // Hide box initially
+    box.style.display = 'none';
+  </script>
 </body>
 </html>
