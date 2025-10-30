@@ -19,7 +19,6 @@ header {
   align-items: center;
   padding: 1rem 2rem;
   background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -36,52 +35,6 @@ header {
   border-radius: 20px;
   width: 250px;
   outline: none;
-}
-
-.featured {
-  padding: 2rem;
-  text-align: center;
-}
-
-.featured-game {
-  display: flex;
-  flex-wrap: wrap;
-  background: rgba(255,255,255,0.1);
-  border-radius: 15px;
-  overflow: hidden;
-  margin-top: 1rem;
-  transition: 0.3s;
-}
-
-.featured-game:hover {
-  transform: scale(1.02);
-}
-
-.featured-game img {
-  flex: 1;
-  width: 100%;
-  max-width: 600px;
-}
-
-.featured-game .info {
-  flex: 1;
-  padding: 1rem;
-  text-align: left;
-}
-
-.featured-game button {
-  background: #00ffcc;
-  color: #000;
-  padding: 0.6rem 1.2rem;
-  border: none;
-  border-radius: 5px;
-  margin-top: 0.5rem;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.featured-game button:hover {
-  background: #00ccaa;
 }
 
 .game-grid {
@@ -118,10 +71,39 @@ header {
   text-align: center;
 }
 
-footer {
-  text-align: center;
-  padding: 1rem;
-  background: rgba(0,0,0,0.5);
-  margin-top: 2rem;
-  font-size: 0.9rem;
+/* Modal styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 200;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#game-frame {
+  width: 100%;
+  height: 80vh;
+}
+
+#close-modal {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
 }
