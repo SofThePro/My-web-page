@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlayHub - Free Online Games</title>
+  <title>PlayHub - Free Browser Games</title>
   <link rel="stylesheet" href="style.css" />
   <script defer src="script.js"></script>
 </head>
@@ -13,22 +13,17 @@
     <input type="text" id="search" placeholder="Search for games..." />
   </header>
 
-  <section class="featured">
-    <h2>🔥 Featured Game</h2>
-    <div class="featured-game">
-      <img src="https://picsum.photos/600/300?random=1" alt="Featured Game">
-      <div class="info">
-        <h3>Galaxy Racer</h3>
-        <p>Fly through the stars and avoid asteroids in this fast-paced space adventure!</p>
-        <button>Play Now</button>
-      </div>
-    </div>
-  </section>
-
   <section class="game-grid">
-    <h2>🕹️ All Games</h2>
+    <h2>🕹️ Choose a Game</h2>
     <div id="games-container" class="games"></div>
   </section>
+
+  <div id="game-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-modal">&times;</span>
+      <iframe id="game-frame" src="" frameborder="0"></iframe>
+    </div>
+  </div>
 
   <footer>
     <p>© 2025 PlayHub. Built with ❤️ by HTML + CSS + JavaScript 🔨🤖🔧</p>
