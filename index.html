@@ -2,693 +2,652 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minesweeper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Flappy Bird (Touch Friendly + Math Test)</title>
   <style>
-    :root{
-      --bg:#0f1220;
-      --panel:#171a2b;
-      --tile:#222641;
-      --tile2:#1b1f36;
-      --open:#2c3153;
-      --border:#3a3f6b;
-      --text:#e8ebff;
-      --muted:#aab0d6;
-      --good:#48d18b;
-      --bad:#ff4d6d;
-      --warn:#ffd166;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 14px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:var(--font);
-      background: radial-gradient(1200px 600px at 20% 0%, #1a1f3b 0%, var(--bg) 55%);
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:24px;
-    }
-    .app{
-      width:min(980px, 100%);
-      display:grid;
-      gap:14px;
-      grid-template-columns: 330px 1fr;
-    }
-    @media (max-width: 900px){
-      .app{grid-template-columns: 1fr}
-    }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: var(--shadow);
-      border-radius: var(--radius);
-      overflow:hidden;
-    }
-    .sidebar{padding:16px}
-    h1{
-      margin:0 0 10px;
-      font-size:22px;
-      letter-spacing:.3px;
-    }
-    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-    label{
-      font-size:12px;
-      color:var(--muted);
-      display:block;
-      margin:10px 0 6px;
-    }
-    select, input, button{
-      font:inherit;
-      color:var(--text);
-    }
-    select, input[type="number"]{
-      width:100%;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      outline:none;
-    }
-    input[type="number"]{appearance:textfield}
-    .btn{
-      cursor:pointer;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      transition: transform .05s ease, background .2s ease;
-      user-select:none;
-    }
-    .btn:hover{background: rgba(255,255,255,.10)}
-    .btn:active{transform: translateY(1px)}
-    .btn.primary{
-      background: rgba(72, 209, 139, .18);
-      border-color: rgba(72, 209, 139, .35);
-    }
-    .btn.danger{
-      background: rgba(255, 77, 109, .16);
-      border-color: rgba(255, 77, 109, .35);
-    }
-    .stats{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-    .stat{
-      padding:10px 12px;
-      border-radius:12px;
-      background: rgba(0,0,0,.16);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .stat .k{font-size:12px; color:var(--muted)}
-    .stat .v{font-size:18px; margin-top:2px}
-    .help{
-      margin-top:12px;
-      font-size:13px;
-      color:var(--muted);
-      line-height:1.35;
-    }
-    .help kbd{
-      font-size:12px;
-      padding:2px 6px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-      color:var(--text);
-    }
-    .boardWrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-    }
-    .topbar{
-      padding:12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(0,0,0,.12);
-    }
-    .status{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      font-size:13px;
-      color:var(--muted);
-    }
-    .pill{
-      padding:6px 10px;
-      border-radius:999px;
-      background: rgba(0,0,0,.18);
-      border: 1px solid rgba(255,255,255,.10);
-      color: var(--text);
-      font-size:12px;
+    :root { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #0b1220;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior: none;
     }
 
-    /* Board grid */
-    .board{
-      --cell: 28px;
-      display:grid;
-      gap:4px;
-      padding:12px;
-      background: rgba(0,0,0,.14);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px;
-      overflow:auto;
-      max-width: 100%;
-      max-height: 76vh;
+    #wrap {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      width: 100%;
+      padding: 14px 0;
     }
-    @media (max-width: 500px){
-      .board{--cell: 26px}
+
+    canvas {
+      width: min(420px, 94vw);
+      height: auto;
+      border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+      background: linear-gradient(#66c8ff, #c8f2ff 65%, #b7f7b7 65%, #7bd67b);
+      touch-action: none;
+      -ms-touch-action: none;
     }
-    .cell{
-      width: var(--cell);
-      height: var(--cell);
-      border-radius: 9px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.05));
-      border:1px solid rgba(255,255,255,.10);
-      color: var(--text);
-      font-weight: 700;
+
+    .hud {
+      width: min(420px, 94vw);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255,255,255,.9);
       font-size: 14px;
-      text-shadow: 0 1px 0 rgba(0,0,0,.25);
-    }
-    .cell:hover{filter: brightness(1.08)}
-    .cell.open{
-      cursor:default;
-      background: rgba(255,255,255,.07);
-      border-color: rgba(255,255,255,.14);
-    }
-    .cell.flag{
-      background: rgba(255, 209, 102, .10);
-      border-color: rgba(255, 209, 102, .35);
-    }
-    .cell.mine{
-      background: rgba(255, 77, 109, .16);
-      border-color: rgba(255, 77, 109, .45);
-    }
-    .cell.boom{
-      background: rgba(255, 77, 109, .28);
-      border-color: rgba(255, 77, 109, .85);
-      transform: scale(1.03);
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    /* number colors */
-    .n1{color:#6ea8fe}
-    .n2{color:#63e6be}
-    .n3{color:#ff8787}
-    .n4{color:#b197fc}
-    .n5{color:#ffa94d}
-    .n6{color:#66d9e8}
-    .n7{color:#ced4da}
-    .n8{color:#ffd43b}
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+    }
 
-    .footerBtns{display:flex; gap:10px; margin-top:12px}
-    .footerBtns .btn{flex:1}
+    .hint { opacity: .85; }
+
+    kbd {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      font-size: 12px;
+    }
+
+    button.pill {
+      border: 1px solid rgba(255,255,255,.18);
+      color: rgba(255,255,255,.92);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button.pill:active { transform: scale(0.98); }
+
+    /* Make the Math button smaller */
+    #mathBtn {
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    /* --- Math modal --- */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 9999;
+      padding: 18px;
+    }
+    .modal.open { display: grid; }
+
+    .card {
+      width: min(420px, 94vw);
+      border-radius: 16px;
+      background: rgba(20, 28, 46, .95);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      padding: 14px;
+      color: rgba(255,255,255,.93);
+    }
+    .card h2 {
+      margin: 6px 0 10px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+    .q {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    input[type="number"]{
+      width: 120px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.95);
+      font-size: 18px;
+      outline: none;
+    }
+    .muted { opacity: .8; font-size: 13px; }
+    .status { font-weight: 700; }
+    .good { color: #7CFFB0; }
+    .bad  { color: #FF8A8A; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="card sidebar">
-      <h1>💣 Minesweeper</h1>
-
-      <label for="preset">Difficulty</label>
-      <select id="preset">
-        <option value="beginner">Beginner (9×9, 10 mines)</option>
-        <option value="intermediate">Intermediate (16×16, 40 mines)</option>
-        <option value="expert">Expert (30×16, 99 mines)</option>
-        <option value="custom">Custom</option>
-      </select>
-
-      <div class="row">
-        <div style="flex:1; min-width: 90px;">
-          <label for="w">Width</label>
-          <input id="w" type="number" min="5" max="50" value="9" />
-        </div>
-        <div style="flex:1; min-width: 90px;">
-          <label for="h">Height</label>
-          <input id="h" type="number" min="5" max="35" value="9" />
-        </div>
-        <div style="flex:1; min-width: 100px;">
-          <label for="m">Mines</label>
-          <input id="m" type="number" min="1" max="500" value="10" />
-        </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="k">Mines left</div>
-          <div class="v" id="minesLeft">10</div>
-        </div>
-        <div class="stat">
-          <div class="k">Time</div>
-          <div class="v"><span id="time">0</span>s</div>
-        </div>
-      </div>
-
-      <div class="footerBtns">
-        <button class="btn primary" id="newBtn">New game</button>
-        <button class="btn" id="revealBtn" title="Reveals the board (cheat)">Reveal</button>
-      </div>
-
-      <div class="help">
-        <p>
-          <strong>How to play:</strong><br/>
-          Left click = open<br/>
-          Right click = flag/unflag<br/>
-          Middle click or <kbd>Shift</kbd>+click on an opened number = chord (open neighbors when flags match)
-        </p>
-        <p>
-          First click is always safe.
-        </p>
+  <div id="wrap">
+    <div class="hud">
+      <div class="pill">Score: <span id="score">0</span></div>
+      <div class="pill hint">Tap / Click / <kbd>Space</kbd> to flap • <kbd>R</kbd> restart</div>
+      <div style="display:flex; gap:10px;">
+        <button id="mathBtn" class="pill" type="button" aria-label="Open math test">Math</button>
+        <button id="restart" class="pill" type="button">Restart</button>
       </div>
     </div>
 
+    <canvas id="game" width="420" height="640" aria-label="Flappy Bird game"></canvas>
+  </div>
+
+  <!-- Math Test Modal -->
+  <div id="mathModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mathTitle">
     <div class="card">
-      <div class="topbar">
-        <div class="status">
-          <span class="pill" id="statePill">Ready</span>
-          <span class="pill" id="sizePill">9×9</span>
-          <span class="pill" id="minePill">10 mines</span>
-        </div>
-        <button class="btn danger" id="resetBtn">Reset</button>
+      <div class="row">
+        <h2 id="mathTitle">Quick Math Test</h2>
+        <button id="closeMath" class="pill" type="button" style="padding:6px 10px;">Close</button>
       </div>
-      <div class="boardWrap">
-        <div id="board" class="board" aria-label="Minesweeper board"></div>
+
+      <div class="row">
+        <div class="q" id="question">2 + 2 = ?</div>
+        <input id="answer" type="number" inputmode="numeric" autocomplete="off" placeholder="Answer" />
       </div>
+
+      <div class="row">
+        <div class="pill muted">Question <span id="qIndex">1</span>/5</div>
+        <div class="pill muted">Correct: <span id="correct">0</span></div>
+      </div>
+
+      <div class="row">
+        <button id="submit" class="pill" type="button">Submit</button>
+        <button id="skip" class="pill" type="button">Skip</button>
+      </div>
+
+      <div class="row">
+        <div id="feedback" class="status muted">Solve 5 questions. (Addition/subtraction)</div>
+      </div>
+
+      <div class="muted">Tip: press <kbd>Enter</kbd> to submit.</div>
     </div>
   </div>
 
-<script>
-(() => {
-  const boardEl = document.getElementById("board");
-  const minesLeftEl = document.getElementById("minesLeft");
-  const timeEl = document.getElementById("time");
-  const statePill = document.getElementById("statePill");
-  const sizePill = document.getElementById("sizePill");
-  const minePill = document.getElementById("minePill");
+  <script>
+    // --- Canvas setup ---
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const restartBtn = document.getElementById("restart");
 
-  const presetEl = document.getElementById("preset");
-  const wEl = document.getElementById("w");
-  const hEl = document.getElementById("h");
-  const mEl = document.getElementById("m");
+    // Math UI
+    const mathBtn = document.getElementById("mathBtn");
+    const modal = document.getElementById("mathModal");
+    const closeMathBtn = document.getElementById("closeMath");
+    const qEl = document.getElementById("question");
+    const ansEl = document.getElementById("answer");
+    const submitBtn = document.getElementById("submit");
+    const skipBtn = document.getElementById("skip");
+    const feedbackEl = document.getElementById("feedback");
+    const qIndexEl = document.getElementById("qIndex");
+    const correctEl = document.getElementById("correct");
 
-  const newBtn = document.getElementById("newBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const revealBtn = document.getElementById("revealBtn");
+    // --- Game constants ---
+    const W = canvas.width, H = canvas.height;
+    const GRAVITY = 0.42;
+    const FLAP_VELOCITY = -7.8;
 
-  const PRESETS = {
-    beginner: { w: 9,  h: 9,  m: 10 },
-    intermediate:{ w: 16, h: 16, m: 40 },
-    expert: { w: 30, h: 16, m: 99 },
-  };
+    const PIPE_WIDTH = 64;
+    const PIPE_GAP = 160;
+    const PIPE_SPACING = 210;
+    const PIPE_SPEED = 2.6;
+    const PIPE_MIN_TOP = 70;
+    const GROUND_H = 80;
 
-  let W=9, H=9, MINES=10;
-  let grid = []; // cell objects
-  let firstClick = true;
-  let gameOver = false;
-  let openedCount = 0;
-  let flagsCount = 0;
+    // --- Game state ---
+    const State = { READY: 0, PLAYING: 1, GAMEOVER: 2, PAUSED: 3 };
+    let state = State.READY;
+    let prevStateBeforeModal = State.READY;
 
-  let timer = null;
-  let seconds = 0;
+    const bird = { x: 120, y: H * 0.45, r: 16, vy: 0, rot: 0 };
+    let pipes = [];
+    let score = 0;
+    let best = Number(localStorage.getItem("flappy_best") || 0);
 
-  function setStatus(text, kind){
-    statePill.textContent = text;
-    statePill.style.borderColor =
-      kind === "win" ? "rgba(72,209,139,.55)" :
-      kind === "lose" ? "rgba(255,77,109,.65)" :
-      "rgba(255,255,255,.10)";
-    statePill.style.background =
-      kind === "win" ? "rgba(72,209,139,.14)" :
-      kind === "lose" ? "rgba(255,77,109,.14)" :
-      "rgba(0,0,0,.18)";
-  }
+    // --- Helpers ---
+    function rand(min, max) { return Math.random() * (max - min) + min; }
 
-  function clampInputs(){
-    W = Math.max(5, Math.min(50, parseInt(wEl.value || "9", 10)));
-    H = Math.max(5, Math.min(35, parseInt(hEl.value || "9", 10)));
-    const maxM = W*H - 1;
-    MINES = Math.max(1, Math.min(maxM, parseInt(mEl.value || "10", 10)));
-    wEl.value = W; hEl.value = H; mEl.value = MINES;
-  }
+    function reset() {
+      state = State.READY;
+      bird.y = H * 0.45;
+      bird.vy = 0;
+      bird.rot = 0;
+      pipes = [];
+      score = 0;
+      scoreEl.textContent = score;
+      spawnInitialPipes();
+    }
 
-  function updatePills(){
-    sizePill.textContent = `${W}×${H}`;
-    minePill.textContent = `${MINES} mines`;
-  }
+    function spawnPipe(x) {
+      const topH = rand(PIPE_MIN_TOP, H - GROUND_H - PIPE_GAP - PIPE_MIN_TOP);
+      pipes.push({ x, topH, passed: false });
+    }
 
-  function stopTimer(){
-    if (timer){ clearInterval(timer); timer = null; }
-  }
-  function startTimer(){
-    stopTimer();
-    timer = setInterval(() => {
-      seconds++;
-      timeEl.textContent = seconds;
-    }, 1000);
-  }
-  function resetTimer(){
-    stopTimer();
-    seconds = 0;
-    timeEl.textContent = "0";
-  }
+    function spawnInitialPipes() {
+      const startX = W + 120;
+      for (let i = 0; i < 4; i++) spawnPipe(startX + i * PIPE_SPACING);
+    }
 
-  function idx(x,y){ return y*W + x; }
-  function inBounds(x,y){ return x>=0 && x<W && y>=0 && y<H; }
+    function flap() {
+      if (modal.classList.contains("open")) return;
+      if (state === State.READY) state = State.PLAYING;
+      if (state === State.GAMEOVER || state === State.PAUSED) return;
+      bird.vy = FLAP_VELOCITY;
+    }
 
-  function neighbors(x,y){
-    const out = [];
-    for (let dy=-1; dy<=1; dy++){
-      for (let dx=-1; dx<=1; dx++){
-        if (dx===0 && dy===0) continue;
-        const nx=x+dx, ny=y+dy;
-        if (inBounds(nx,ny)) out.push([nx,ny]);
+    function vibrate(ms = 10) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function circleRectCollides(cx, cy, r, rx, ry, rw, rh) {
+      const closestX = Math.max(rx, Math.min(cx, rx + rw));
+      const closestY = Math.max(ry, Math.min(cy, ry + rh));
+      const dx = cx - closestX, dy = cy - closestY;
+      return dx * dx + dy * dy <= r * r;
+    }
+
+    function checkCollisions() {
+      if (bird.y + bird.r >= H - GROUND_H) return true;
+      if (bird.y - bird.r <= 0) return true;
+
+      for (const p of pipes) {
+        const x = p.x;
+        const topRect = { x, y: 0, w: PIPE_WIDTH, h: p.topH };
+        const botRect = {
+          x,
+          y: p.topH + PIPE_GAP,
+          w: PIPE_WIDTH,
+          h: H - GROUND_H - (p.topH + PIPE_GAP)
+        };
+        if (circleRectCollides(bird.x, bird.y, bird.r, topRect.x, topRect.y, topRect.w, topRect.h)) return true;
+        if (circleRectCollides(bird.x, bird.y, bird.r, botRect.x, botRect.y, botRect.w, botRect.h)) return true;
+      }
+      return false;
+    }
+
+    // --- Rendering ---
+    function cloud(x, y, s) {
+      ctx.beginPath();
+      ctx.arc(x, y, s * 0.6, 0, Math.PI * 2);
+      ctx.arc(x + s * 0.55, y + s * 0.15, s * 0.55, 0, Math.PI * 2);
+      ctx.arc(x + s * 1.1, y, s * 0.65, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawBackground() {
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < 6; i++) {
+        const cx = (i * 90 + (t * 0.03)) % (W + 120) - 60;
+        const cy = 90 + (i % 2) * 40;
+        cloud(cx, cy, 34);
+      }
+      ctx.restore();
+
+      ctx.fillStyle = "#4db84d";
+      ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
+
+      ctx.fillStyle = "rgba(0,0,0,.12)";
+      const stripeW = 26;
+      for (let x = -((t * PIPE_SPEED) % stripeW); x < W; x += stripeW) {
+        ctx.fillRect(x, H - GROUND_H, 12, GROUND_H);
       }
     }
-    return out;
-  }
 
-  function makeEmptyGrid(){
-    grid = new Array(W*H).fill(0).map((_, i) => {
-      const x = i % W, y = (i / W) | 0;
-      return {
-        x, y,
-        mine: false,
-        open: false,
-        flag: false,
-        adj: 0,
-        el: null
-      };
-    });
-  }
+    function drawPipe(x, y, w, h, upsideDown) {
+      const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+      grad.addColorStop(0, "#1f9d3a");
+      grad.addColorStop(0.5, "#36d45c");
+      grad.addColorStop(1, "#1b7f31");
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, w, h);
 
-  // Place mines AFTER first click so first click is safe.
-  // Also, we keep a 3x3 safe zone around the first click (classic friendly behavior).
-  function placeMinesAvoiding(sx, sy){
-    const forbidden = new Set();
-    forbidden.add(idx(sx,sy));
-    for (const [nx,ny] of neighbors(sx,sy)) forbidden.add(idx(nx,ny));
+      ctx.fillStyle = "rgba(255,255,255,.15)";
+      const rimH = 16;
+      if (upsideDown) ctx.fillRect(x - 4, y + h - rimH, w + 8, rimH);
+      else ctx.fillRect(x - 4, y, w + 8, rimH);
 
-    const candidates = [];
-    for (let i=0; i<grid.length; i++){
-      if (!forbidden.has(i)) candidates.push(i);
+      ctx.strokeStyle = "rgba(0,0,0,.25)";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
     }
 
-    // Fisher-Yates shuffle candidates
-    for (let i=candidates.length-1; i>0; i--){
-      const j = (Math.random() * (i+1)) | 0;
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-    }
-
-    const toPlace = Math.min(MINES, candidates.length);
-    for (let k=0; k<toPlace; k++){
-      grid[candidates[k]].mine = true;
-    }
-
-    // Compute adjacency
-    for (const c of grid){
-      if (c.mine) continue;
-      let count = 0;
-      for (const [nx,ny] of neighbors(c.x,c.y)){
-        if (grid[idx(nx,ny)].mine) count++;
+    function drawPipes() {
+      for (const p of pipes) {
+        const x = p.x;
+        const topH = p.topH;
+        const botY = topH + PIPE_GAP;
+        const botH = (H - GROUND_H) - botY;
+        drawPipe(x, 0, PIPE_WIDTH, topH, true);
+        drawPipe(x, botY, PIPE_WIDTH, botH, false);
       }
-      c.adj = count;
     }
-  }
 
-  function renderBoard(){
-    boardEl.innerHTML = "";
-    boardEl.style.gridTemplateColumns = `repeat(${W}, var(--cell))`;
+    function drawBird() {
+      ctx.save();
+      ctx.translate(bird.x, bird.y);
 
-    for (const c of grid){
-      const d = document.createElement("div");
-      d.className = "cell";
-      d.setAttribute("role","button");
-      d.setAttribute("aria-label", `Cell ${c.x+1},${c.y+1}`);
-      d.oncontextmenu = (e) => e.preventDefault(); // disable menu
-      d.addEventListener("mousedown", (e) => onMouseDown(e, c));
-      d.addEventListener("click", (e) => onLeftClick(e, c));
-      d.addEventListener("auxclick", (e) => onAuxClick(e, c)); // middle click
-      c.el = d;
-      boardEl.appendChild(d);
+      bird.rot = Math.max(-0.45, Math.min(1.2, bird.vy * 0.08));
+      ctx.rotate(bird.rot);
+
+      ctx.fillStyle = "#ffd23c";
+      ctx.beginPath();
+      ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(0,0,0,.08)";
+      ctx.beginPath();
+      ctx.ellipse(-4, 3, 10, 7, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(6, -5, 5.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#1a1a1a";
+      ctx.beginPath();
+      ctx.arc(7.5, -5, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ff7a00";
+      ctx.beginPath();
+      ctx.moveTo(12, 1);
+      ctx.lineTo(24, 5);
+      ctx.lineTo(12, 9);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(0,0,0,.22)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
     }
-  }
 
-  function setCellText(c, text){
-    c.el.textContent = text ?? "";
-  }
+    function roundRect(x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+    }
 
-  function paintCell(c){
-    const el = c.el;
-    el.classList.toggle("open", c.open);
-    el.classList.toggle("flag", c.flag);
-    el.classList.remove("mine", "boom");
-    el.classList.remove("n1","n2","n3","n4","n5","n6","n7","n8");
+    function drawOverlay() {
+      ctx.save();
+      ctx.fillStyle = "rgba(0,0,0,.25)";
+      ctx.fillRect(0, 0, W, H);
 
-    if (c.open){
-      if (c.mine){
-        el.classList.add("mine");
-        setCellText(c, "💣");
-      } else if (c.adj > 0){
-        el.classList.add("n"+c.adj);
-        setCellText(c, String(c.adj));
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,.95)";
+      ctx.font = "700 42px system-ui";
+      const title =
+        state === State.GAMEOVER ? "Game Over" :
+        state === State.PAUSED ? "Paused" :
+        "Flappy Bird";
+      ctx.fillText(title, W / 2, 190);
+
+      ctx.font = "500 18px system-ui";
+      if (state === State.READY) {
+        ctx.fillText("Tap / Click / Space to start", W / 2, 235);
+      } else if (state === State.PAUSED) {
+        ctx.fillText("Math test is open", W / 2, 235);
       } else {
-        setCellText(c, "");
+        ctx.fillText(`Score: ${score}   Best: ${best}`, W / 2, 235);
+        ctx.fillText("Press R or tap Restart", W / 2, 265);
       }
-    } else {
-      if (c.flag){
-        setCellText(c, "🚩");
+
+      ctx.fillStyle = "rgba(255,255,255,.12)";
+      roundRect(W / 2 - 140, 310, 280, 52, 14);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,.95)";
+      ctx.font = "600 16px system-ui";
+      ctx.fillText("Tip: keep short, steady taps", W / 2, 342);
+
+      ctx.restore();
+    }
+
+    // --- Game loop ---
+    let last = 0;
+    let t = 0;
+
+    function update(dt) {
+      t += dt;
+
+      if (state === State.PLAYING) {
+        bird.vy += GRAVITY;
+        bird.y += bird.vy;
       } else {
-        setCellText(c, "");
+        bird.y = H * 0.45 + Math.sin(t * 0.004) * 10;
       }
-    }
-  }
 
-  function updateCounters(){
-    minesLeftEl.textContent = String(Math.max(0, MINES - flagsCount));
-  }
+      if (state === State.PLAYING) {
+        for (const p of pipes) p.x -= PIPE_SPEED;
 
-  function openCell(c){
-    if (gameOver || c.open || c.flag) return;
+        const first = pipes[0];
+        if (first && first.x + PIPE_WIDTH < -10) {
+          pipes.shift();
+          const lastX = pipes[pipes.length - 1].x;
+          spawnPipe(lastX + PIPE_SPACING);
+        }
 
-    c.open = true;
-    openedCount++;
-    paintCell(c);
-
-    if (c.mine){
-      explodeAt(c);
-      return;
-    }
-
-    // If zero, flood fill
-    if (c.adj === 0){
-      const stack = [[c.x,c.y]];
-      const seen = new Set([idx(c.x,c.y)]);
-      while (stack.length){
-        const [x,y] = stack.pop();
-        for (const [nx,ny] of neighbors(x,y)){
-          const n = grid[idx(nx,ny)];
-          if (n.open || n.flag) continue;
-          if (n.mine) continue;
-          n.open = true;
-          openedCount++;
-          paintCell(n);
-          if (n.adj === 0){
-            const key = idx(nx,ny);
-            if (!seen.has(key)){
-              seen.add(key);
-              stack.push([nx,ny]);
-            }
+        for (const p of pipes) {
+          if (!p.passed && p.x + PIPE_WIDTH < bird.x) {
+            p.passed = true;
+            score++;
+            scoreEl.textContent = score;
           }
         }
-      }
-    }
 
-    checkWin();
-  }
-
-  function toggleFlag(c){
-    if (gameOver || c.open) return;
-    c.flag = !c.flag;
-    flagsCount += c.flag ? 1 : -1;
-    paintCell(c);
-    updateCounters();
-    checkWin(); // allow winning by flagging all mines if everything else open
-  }
-
-  function chordOpen(c){
-    if (gameOver || !c.open || c.mine || c.adj === 0) return;
-
-    // count flags around
-    let f = 0;
-    const neigh = neighbors(c.x,c.y);
-    for (const [nx,ny] of neigh){
-      if (grid[idx(nx,ny)].flag) f++;
-    }
-    if (f !== c.adj) return;
-
-    // open non-flag neighbors
-    for (const [nx,ny] of neigh){
-      const n = grid[idx(nx,ny)];
-      if (!n.flag && !n.open){
-        openCell(n);
-      }
-    }
-  }
-
-  function explodeAt(c){
-    gameOver = true;
-    stopTimer();
-    setStatus("Boom! 💥", "lose");
-
-    // show all mines
-    for (const cell of grid){
-      if (cell.mine){
-        cell.open = true;
-        paintCell(cell);
-      }
-    }
-    c.el.classList.add("boom");
-  }
-
-  function revealAll(){
-    for (const cell of grid){
-      cell.open = true;
-      paintCell(cell);
-    }
-  }
-
-  function checkWin(){
-    if (gameOver) return;
-    const safeCells = W*H - MINES;
-    if (openedCount >= safeCells){
-      gameOver = true;
-      stopTimer();
-      setStatus("You win! 🎉", "win");
-
-      // auto-flag remaining mines for satisfaction
-      for (const cell of grid){
-        if (cell.mine && !cell.flag){
-          cell.flag = true;
-          flagsCount++;
-          paintCell(cell);
+        if (checkCollisions()) {
+          state = State.GAMEOVER;
+          best = Math.max(best, score);
+          localStorage.setItem("flappy_best", String(best));
+          vibrate(30);
         }
       }
-      updateCounters();
-    }
-  }
-
-  function onMouseDown(e, c){
-    // Prevent middle-click scroll on some browsers
-    if (e.button === 1) e.preventDefault();
-  }
-
-  function onLeftClick(e, c){
-    if (gameOver) return;
-
-    // Shift+click chord on open cell
-    if (e.shiftKey && c.open){
-      chordOpen(c);
-      return;
     }
 
-    if (c.flag) return;
+    function render() {
+      ctx.clearRect(0, 0, W, H);
+      drawBackground();
+      drawPipes();
+      drawBird();
 
-    if (firstClick){
-      firstClick = false;
-      placeMinesAvoiding(c.x, c.y);
-      startTimer();
-      setStatus("Playing", "play");
-      // Paint adjacency numbers for any already-open cell (none yet)
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,.95)";
+      ctx.font = "800 44px system-ui";
+      if (state === State.PLAYING) ctx.fillText(score, W / 2, 92);
+      ctx.restore();
+
+      if (state !== State.PLAYING) drawOverlay();
     }
 
-    openCell(c);
-  }
-
-  function onAuxClick(e, c){
-    // Middle click for chord
-    if (e.button === 1){
-      chordOpen(c);
+    function loop(ts) {
+      const dt = Math.min(32, ts - last);
+      last = ts;
+      update(dt);
+      render();
+      requestAnimationFrame(loop);
     }
-  }
 
-  // Right-click flagging
-  boardEl.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    const target = e.target.closest(".cell");
-    if (!target) return;
-    const i = Array.prototype.indexOf.call(boardEl.children, target);
-    if (i < 0) return;
-    toggleFlag(grid[i]);
-  });
+    // --- Touch-friendly input ---
+    canvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      canvas.setPointerCapture?.(e.pointerId);
+      if (state !== State.GAMEOVER) {
+        flap();
+        vibrate(10);
+      }
+    }, { passive: false });
 
-  function newGame(){
-    clampInputs();
-    updatePills();
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
-    firstClick = true;
-    gameOver = false;
-    openedCount = 0;
-    flagsCount = 0;
+    window.addEventListener("keydown", (e) => {
+      if (modal.classList.contains("open")) {
+        if (e.key === "Escape") closeMath();
+        return;
+      }
+      if (e.code === "Space") { e.preventDefault(); flap(); }
+      if (e.key.toLowerCase() === "r") reset();
+    });
 
-    resetTimer();
-    setStatus("Ready", "ready");
+    restartBtn.addEventListener("click", () => reset());
 
-    makeEmptyGrid();
-    renderBoard();
-    updateCounters();
-  }
+    // -----------------------------
+    //          MATH TEST
+    // -----------------------------
+    let mathTotal = 5;
+    let mathIndex = 0;
+    let mathCorrect = 0;
+    let current = { a: 0, b: 0, op: "+", answer: 0 };
 
-  function resetGame(){
-    // Same settings, fresh grid
-    newGame();
-  }
+    function makeQuestion() {
+      const op = Math.random() < 0.5 ? "+" : "-";
+      let a = Math.floor(rand(1, 21)); // 1..20
+      let b = Math.floor(rand(1, 21));
+      if (op === "-" && b > a) [a, b] = [b, a]; // keep it non-negative
+      const answer = op === "+" ? (a + b) : (a - b);
+      current = { a, b, op, answer };
 
-  presetEl.addEventListener("change", () => {
-    const v = presetEl.value;
-    if (v === "custom") {
-      // keep current values
-    } else {
-      const p = PRESETS[v];
-      wEl.value = p.w; hEl.value = p.h; mEl.value = p.m;
+      qEl.textContent = `${a} ${op} ${b} = ?`;
+      ansEl.value = "";
+      ansEl.focus({ preventScroll: true });
+
+      qIndexEl.textContent = String(mathIndex + 1);
+      correctEl.textContent = String(mathCorrect);
     }
-    newGame();
-  });
 
-  [wEl, hEl, mEl].forEach(el => el.addEventListener("change", () => {
-    presetEl.value = "custom";
-    newGame();
-  }));
+    function openMath() {
+      if (!modal.classList.contains("open")) {
+        prevStateBeforeModal = state;
+        state = State.PAUSED;
 
-  newBtn.addEventListener("click", newGame);
-  resetBtn.addEventListener("click", resetGame);
-  revealBtn.addEventListener("click", () => {
-    if (firstClick){
-      // If reveal before first click, place mines arbitrarily (no safe zone needed)
-      firstClick = false;
-      placeMinesAvoiding(0,0);
-      setStatus("Revealed (cheat)", "play");
+        // new test each open
+        mathIndex = 0;
+        mathCorrect = 0;
+        feedbackEl.className = "status muted";
+        feedbackEl.textContent = "Solve 5 questions. (Addition/subtraction)";
+        makeQuestion();
+
+        modal.classList.add("open");
+      }
     }
-    revealAll();
-  });
 
-  // Start
-  newGame();
-})();
-</script>
+    function closeMath() {
+      modal.classList.remove("open");
+      // resume what you were doing (READY/PLAYING/GAMEOVER)
+      state = prevStateBeforeModal === State.PLAYING ? State.PLAYING : prevStateBeforeModal;
+      canvas.focus?.();
+    }
+
+    function finishMath() {
+      const pct = Math.round((mathCorrect / mathTotal) * 100);
+      if (mathCorrect >= 4) {
+        feedbackEl.className = "status good";
+        feedbackEl.textContent = `Nice! You got ${mathCorrect}/${mathTotal} (${pct}%).`;
+        vibrate(20);
+      } else {
+        feedbackEl.className = "status bad";
+        feedbackEl.textContent = `Done: ${mathCorrect}/${mathTotal} (${pct}%). Try again!`;
+        vibrate(30);
+      }
+      // keep modal open; user can close or press Math again to restart
+    }
+
+    function submitMath() {
+      if (mathIndex >= mathTotal) return;
+
+      const val = ansEl.value.trim();
+      if (val === "") {
+        feedbackEl.className = "status bad";
+        feedbackEl.textContent = "Enter an answer (or press Skip).";
+        return;
+      }
+
+      const n = Number(val);
+      const ok = Number.isFinite(n) && n === current.answer;
+
+      if (ok) {
+        mathCorrect++;
+        feedbackEl.className = "status good";
+        feedbackEl.textContent = "Correct ✅";
+        vibrate(10);
+      } else {
+        feedbackEl.className = "status bad";
+        feedbackEl.textContent = `Nope ❌ (answer was ${current.answer})`;
+        vibrate(15);
+      }
+
+      mathIndex++;
+      correctEl.textContent = String(mathCorrect);
+
+      if (mathIndex >= mathTotal) {
+        qIndexEl.textContent = String(mathTotal);
+        finishMath();
+      } else {
+        setTimeout(makeQuestion, 350);
+      }
+    }
+
+    function skipMath() {
+      if (mathIndex >= mathTotal) return;
+      feedbackEl.className = "status muted";
+      feedbackEl.textContent = `Skipped (answer was ${current.answer})`;
+      mathIndex++;
+      if (mathIndex >= mathTotal) {
+        qIndexEl.textContent = String(mathTotal);
+        finishMath();
+      } else {
+        setTimeout(makeQuestion, 250);
+      }
+    }
+
+    mathBtn.addEventListener("click", openMath);
+    closeMathBtn.addEventListener("click", closeMath);
+    submitBtn.addEventListener("click", submitMath);
+    skipBtn.addEventListener("click", skipMath);
+
+    ansEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") submitMath();
+    });
+
+    // Clicking outside the card closes the modal (optional)
+    modal.addEventListener("pointerdown", (e) => {
+      if (e.target === modal) closeMath();
+    });
+
+    // --- Start ---
+    reset();
+    requestAnimationFrame(loop);
+  </script>
 </body>
 </html>
