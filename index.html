@@ -1,653 +1,361 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Flappy Bird (Touch Friendly + Math Test)</title>
-  <style>
-    :root { color-scheme: dark; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Flappy Bird Pro + Math Mode</title>
 
-    body {
-      margin: 0;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      background: #0b1220;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      overscroll-behavior: none;
-    }
+<style>
+:root{color-scheme:dark}
+body{
+  margin:0;
+  background:#0b1220;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  font-family:system-ui;
+  overflow:hidden;
+}
 
-    #wrap {
-      display: grid;
-      gap: 10px;
-      justify-items: center;
-      width: 100%;
-      padding: 14px 0;
-    }
+#game{
+  background:linear-gradient(#66c8ff,#c8f2ff 65%,#7bd67b 65%);
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+  touch-action:none;
+}
 
-    canvas {
-      width: min(420px, 94vw);
-      height: auto;
-      border-radius: 14px;
-      box-shadow: 0 12px 40px rgba(0,0,0,.35);
-      background: linear-gradient(#66c8ff, #c8f2ff 65%, #b7f7b7 65%, #7bd67b);
-      touch-action: none;
-      -ms-touch-action: none;
-    }
+.hud{
+  position:fixed;
+  top:15px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  z-index:10;
+}
 
-    .hud {
-      width: min(420px, 94vw);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgba(255,255,255,.9);
-      font-size: 14px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+.pill{
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;
+  cursor:pointer;
+}
 
-    .pill {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-    }
+#mathOverlay{
+  position:fixed;
+  inset:0;
+  background:#000;
+  color:#fff;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
 
-    .hint { opacity: .85; }
+#mathOverlay h1{
+  margin:10px 0;
+}
 
-    kbd {
-      padding: 2px 6px;
-      border-radius: 6px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.18);
-      font-size: 12px;
-    }
+#mathOverlay input{
+  padding:12px;
+  font-size:20px;
+  border-radius:10px;
+  border:none;
+  text-align:center;
+  width:120px;
+}
 
-    button.pill {
-      border: 1px solid rgba(255,255,255,.18);
-      color: rgba(255,255,255,.92);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    button.pill:active { transform: scale(0.98); }
+#mathOverlay button{
+  margin-top:15px;
+  padding:10px 20px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+}
 
-    /* Make the Math button smaller */
-    #mathBtn {
-      padding: 6px 10px;
-      font-size: 13px;
-    }
-
-    /* --- Math modal --- */
-    .modal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      place-items: center;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      z-index: 9999;
-      padding: 18px;
-    }
-    .modal.open { display: grid; }
-
-    .card {
-      width: min(420px, 94vw);
-      border-radius: 16px;
-      background: rgba(20, 28, 46, .95);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 18px 60px rgba(0,0,0,.45);
-      padding: 14px;
-      color: rgba(255,255,255,.93);
-    }
-    .card h2 {
-      margin: 6px 0 10px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      margin: 8px 0;
-    }
-    .q {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: .3px;
-    }
-    input[type="number"]{
-      width: 120px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      color: rgba(255,255,255,.95);
-      font-size: 18px;
-      outline: none;
-    }
-    .muted { opacity: .8; font-size: 13px; }
-    .status { font-weight: 700; }
-    .good { color: #7CFFB0; }
-    .bad  { color: #FF8A8A; }
-  </style>
+.timer{
+  font-size:18px;
+  margin-top:10px;
+  opacity:.8;
+}
+</style>
 </head>
 <body>
-  <div id="wrap">
-    <div class="hud">
-      <div class="pill">Score: <span id="score">0</span></div>
-      <div class="pill hint">Tap / Click / <kbd>Space</kbd> to flap • <kbd>R</kbd> restart</div>
-      <div style="display:flex; gap:10px;">
-        <button id="mathBtn" class="pill" type="button" aria-label="Open math test">Math</button>
-        <button id="restart" class="pill" type="button">Restart</button>
-      </div>
-    </div>
 
-    <canvas id="game" width="420" height="640" aria-label="Flappy Bird game"></canvas>
-  </div>
+<div class="hud">
+  <div class="pill">Score: <span id="score">0</span></div>
+  <div class="pill" id="mathBtn">Math Mode</div>
+  <div class="pill" id="restartBtn">Restart</div>
+</div>
 
-  <!-- Math Test Modal -->
-  <div id="mathModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mathTitle">
-    <div class="card">
-      <div class="row">
-        <h2 id="mathTitle">Quick Math Test</h2>
-        <button id="closeMath" class="pill" type="button" style="padding:6px 10px;">Close</button>
-      </div>
+<canvas id="game" width="420" height="640"></canvas>
 
-      <div class="row">
-        <div class="q" id="question">2 + 2 = ?</div>
-        <input id="answer" type="number" inputmode="numeric" autocomplete="off" placeholder="Answer" />
-      </div>
+<!-- FULLSCREEN MATH -->
+<div id="mathOverlay">
+  <h1>Advanced Math Challenge</h1>
+  <div id="question" style="font-size:28px;margin:10px;"></div>
+  <input id="answer" type="number">
+  <button id="submitAnswer">Submit</button>
+  <div class="timer" id="timer"></div>
+  <div id="result" style="margin-top:20px;font-size:18px;"></div>
+</div>
 
-      <div class="row">
-        <div class="pill muted">Question <span id="qIndex">1</span>/5</div>
-        <div class="pill muted">Correct: <span id="correct">0</span></div>
-      </div>
+<script>
+/* =========================
+   FLAPPY BIRD CORE
+========================= */
 
-      <div class="row">
-        <button id="submit" class="pill" type="button">Submit</button>
-        <button id="skip" class="pill" type="button">Skip</button>
-      </div>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
 
-      <div class="row">
-        <div id="feedback" class="status muted">Solve 5 questions. (Addition/subtraction)</div>
-      </div>
+const W = canvas.width;
+const H = canvas.height;
 
-      <div class="muted">Tip: press <kbd>Enter</kbd> to submit.</div>
-    </div>
-  </div>
+const GRAVITY = 0.45;
+const FLAP = -8;
+const PIPE_WIDTH = 70;
+const PIPE_GAP = 170;
+const PIPE_SPACE = 220;
+const GROUND = 80;
 
-  <script>
-    // --- Canvas setup ---
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const scoreEl = document.getElementById("score");
-    const restartBtn = document.getElementById("restart");
+const State = {READY:0, PLAYING:1, GAMEOVER:2, PAUSED:3};
+let state = State.READY;
+let prevState = State.READY;
+let resumeLock=false;
 
-    // Math UI
-    const mathBtn = document.getElementById("mathBtn");
-    const modal = document.getElementById("mathModal");
-    const closeMathBtn = document.getElementById("closeMath");
-    const qEl = document.getElementById("question");
-    const ansEl = document.getElementById("answer");
-    const submitBtn = document.getElementById("submit");
-    const skipBtn = document.getElementById("skip");
-    const feedbackEl = document.getElementById("feedback");
-    const qIndexEl = document.getElementById("qIndex");
-    const correctEl = document.getElementById("correct");
+let score=0;
+let best=Number(localStorage.getItem("best")||0);
 
-    // --- Game constants ---
-    const W = canvas.width, H = canvas.height;
-    const GRAVITY = 0.42;
-    const FLAP_VELOCITY = -7.8;
+const bird={x:120,y:H*0.45,r:16,vy:0};
+let pipes=[];
 
-    const PIPE_WIDTH = 64;
-    const PIPE_GAP = 160;
-    const PIPE_SPACING = 210;
-    const PIPE_SPEED = 2.6;
-    const PIPE_MIN_TOP = 70;
-    const GROUND_H = 80;
+function rand(a,b){return Math.random()*(b-a)+a}
 
-    // --- Game state ---
-    const State = { READY: 0, PLAYING: 1, GAMEOVER: 2, PAUSED: 3 };
-    let state = State.READY;
-    let prevStateBeforeModal = State.READY;
+function reset(){
+  state=State.READY;
+  score=0;
+  scoreEl.textContent=0;
+  bird.y=H*0.45;
+  bird.vy=0;
+  pipes=[];
+  for(let i=0;i<4;i++){
+    spawnPipe(W+120+i*PIPE_SPACE);
+  }
+}
 
-    const bird = { x: 120, y: H * 0.45, r: 16, vy: 0, rot: 0 };
-    let pipes = [];
-    let score = 0;
-    let best = Number(localStorage.getItem("flappy_best") || 0);
+function spawnPipe(x){
+  const top=rand(80,H-GROUND-PIPE_GAP-80);
+  pipes.push({x,top,passed:false});
+}
 
-    // --- Helpers ---
-    function rand(min, max) { return Math.random() * (max - min) + min; }
+function flap(){
+  if(state!==State.PLAYING && state!==State.READY) return;
+  if(resumeLock) return;
+  if(state===State.READY) state=State.PLAYING;
+  bird.vy=FLAP;
+}
 
-    function reset() {
-      state = State.READY;
-      bird.y = H * 0.45;
-      bird.vy = 0;
-      bird.rot = 0;
-      pipes = [];
-      score = 0;
-      scoreEl.textContent = score;
-      spawnInitialPipes();
+function collide(cx,cy,r,rx,ry,rw,rh){
+  const x=Math.max(rx,Math.min(cx,rx+rw));
+  const y=Math.max(ry,Math.min(cy,ry+rh));
+  const dx=cx-x,dy=cy-y;
+  return dx*dx+dy*dy<=r*r;
+}
+
+function update(){
+  if(state!==State.PLAYING) return;
+
+  bird.vy+=GRAVITY;
+  bird.y+=bird.vy;
+
+  const speed=2.6+score*0.05;
+
+  for(const p of pipes) p.x-=speed;
+
+  if(pipes[0].x+PIPE_WIDTH<-20){
+    pipes.shift();
+    spawnPipe(pipes[pipes.length-1].x+PIPE_SPACE);
+  }
+
+  for(const p of pipes){
+    if(!p.passed && p.x+PIPE_WIDTH<bird.x){
+      p.passed=true;
+      score++;
+      scoreEl.textContent=score;
     }
+  }
+
+  if(bird.y+bird.r>=H-GROUND||bird.y-bird.r<=0){
+    state=State.GAMEOVER;
+  }
+
+  for(const p of pipes){
+    if(collide(bird.x,bird.y,bird.r,p.x,0,PIPE_WIDTH,p.top)||
+       collide(bird.x,bird.y,bird.r,p.x,p.top+PIPE_GAP,
+       PIPE_WIDTH,H-GROUND-(p.top+PIPE_GAP))){
+         state=State.GAMEOVER;
+       }
+  }
+
+  if(state===State.GAMEOVER){
+    best=Math.max(best,score);
+    localStorage.setItem("best",best);
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  ctx.fillStyle="#4db84d";
+  ctx.fillRect(0,H-GROUND,W,GROUND);
+
+  ctx.fillStyle="#36d45c";
+  for(const p of pipes){
+    ctx.fillRect(p.x,0,PIPE_WIDTH,p.top);
+    ctx.fillRect(p.x,p.top+PIPE_GAP,
+      PIPE_WIDTH,H-GROUND-(p.top+PIPE_GAP));
+  }
+
+  ctx.fillStyle="#ffd23c";
+  ctx.beginPath();
+  ctx.arc(bird.x,bird.y,bird.r,0,Math.PI*2);
+  ctx.fill();
+
+  if(state===State.PLAYING){
+    ctx.fillStyle="#fff";
+    ctx.font="bold 42px system-ui";
+    ctx.textAlign="center";
+    ctx.fillText(score,W/2,90);
+  }
+
+  if(state!==State.PLAYING){
+    ctx.fillStyle="rgba(0,0,0,.4)";
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#fff";
+    ctx.font="bold 36px system-ui";
+    ctx.textAlign="center";
+    ctx.fillText(
+      state===State.GAMEOVER?"Game Over":"Flappy Bird",
+      W/2,200
+    );
+    ctx.font="18px system-ui";
+    ctx.fillText("Tap or Space to Play",W/2,240);
+  }
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* =========================
+   FULLSCREEN MATH MODE
+========================= */
+
+const overlay=document.getElementById("mathOverlay");
+const questionEl=document.getElementById("question");
+const answerEl=document.getElementById("answer");
+const timerEl=document.getElementById("timer");
+const resultEl=document.getElementById("result");
+
+let total=10;
+let correct=0;
+let currentAnswer=0;
+let time=60;
+let timerInterval;
+
+function newQuestion(){
+  const ops=["+","-","*","/"];
+  const op=ops[Math.floor(Math.random()*ops.length)];
+  let a=Math.floor(rand(2,20));
+  let b=Math.floor(rand(2,20));
+
+  if(op==="/"){
+    currentAnswer=a;
+    b=Math.floor(rand(2,12));
+    a=currentAnswer*b;
+  }else if(op==="*"){
+    currentAnswer=a*b;
+  }else if(op==="+"){
+    currentAnswer=a+b;
+  }else{
+    if(b>a)[a,b]=[b,a];
+    currentAnswer=a-b;
+  }
+
+  questionEl.textContent=`${a} ${op} ${b} = ?`;
+  answerEl.value="";
+  answerEl.focus();
+}
+
+function startMath(){
+  prevState=state;
+  state=State.PAUSED;
+  resumeLock=true;
+
+  overlay.style.display="flex";
+  correct=0;
+  time=60;
+  resultEl.textContent="";
+  newQuestion();
+
+  timerInterval=setInterval(()=>{
+    time--;
+    timerEl.textContent=`Time Left: ${time}s`;
+    if(time<=0) finishMath();
+  },1000);
+}
+
+function submitAnswer(){
+  if(Number(answerEl.value)===currentAnswer){
+    correct++;
+  }
+  newQuestion();
+}
+
+function finishMath(){
+  clearInterval(timerInterval);
+  let grade=correct>=8?"A":
+            correct>=6?"B":
+            correct>=4?"C":"Fail";
+
+  resultEl.innerHTML=`Score: ${correct}/${total}<br>Grade: ${grade}`;
+
+  if(grade==="A"||grade==="B"){
+    score+=10;
+    scoreEl.textContent=score;
+  }
+
+  setTimeout(()=>{
+    overlay.style.display="none";
+    state=prevState;
+    resumeLock=false;
+  },3000);
+}
+
+document.getElementById("mathBtn").onclick=startMath;
+document.getElementById("submitAnswer").onclick=submitAnswer;
+answerEl.addEventListener("keydown",e=>{
+  if(e.key==="Enter") submitAnswer();
+});
+document.getElementById("restartBtn").onclick=reset;
+
+canvas.addEventListener("pointerdown",flap);
+window.addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();flap();}
+  if(e.key==="r") reset();
+});
+
+reset();
+loop();
+</script>
 
-    function spawnPipe(x) {
-      const topH = rand(PIPE_MIN_TOP, H - GROUND_H - PIPE_GAP - PIPE_MIN_TOP);
-      pipes.push({ x, topH, passed: false });
-    }
-
-    function spawnInitialPipes() {
-      const startX = W + 120;
-      for (let i = 0; i < 4; i++) spawnPipe(startX + i * PIPE_SPACING);
-    }
-
-    function flap() {
-      if (modal.classList.contains("open")) return;
-      if (state === State.READY) state = State.PLAYING;
-      if (state === State.GAMEOVER || state === State.PAUSED) return;
-      bird.vy = FLAP_VELOCITY;
-    }
-
-    function vibrate(ms = 10) {
-      if (navigator.vibrate) navigator.vibrate(ms);
-    }
-
-    function circleRectCollides(cx, cy, r, rx, ry, rw, rh) {
-      const closestX = Math.max(rx, Math.min(cx, rx + rw));
-      const closestY = Math.max(ry, Math.min(cy, ry + rh));
-      const dx = cx - closestX, dy = cy - closestY;
-      return dx * dx + dy * dy <= r * r;
-    }
-
-    function checkCollisions() {
-      if (bird.y + bird.r >= H - GROUND_H) return true;
-      if (bird.y - bird.r <= 0) return true;
-
-      for (const p of pipes) {
-        const x = p.x;
-        const topRect = { x, y: 0, w: PIPE_WIDTH, h: p.topH };
-        const botRect = {
-          x,
-          y: p.topH + PIPE_GAP,
-          w: PIPE_WIDTH,
-          h: H - GROUND_H - (p.topH + PIPE_GAP)
-        };
-        if (circleRectCollides(bird.x, bird.y, bird.r, topRect.x, topRect.y, topRect.w, topRect.h)) return true;
-        if (circleRectCollides(bird.x, bird.y, bird.r, botRect.x, botRect.y, botRect.w, botRect.h)) return true;
-      }
-      return false;
-    }
-
-    // --- Rendering ---
-    function cloud(x, y, s) {
-      ctx.beginPath();
-      ctx.arc(x, y, s * 0.6, 0, Math.PI * 2);
-      ctx.arc(x + s * 0.55, y + s * 0.15, s * 0.55, 0, Math.PI * 2);
-      ctx.arc(x + s * 1.1, y, s * 0.65, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    function drawBackground() {
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      ctx.fillStyle = "#ffffff";
-      for (let i = 0; i < 6; i++) {
-        const cx = (i * 90 + (t * 0.03)) % (W + 120) - 60;
-        const cy = 90 + (i % 2) * 40;
-        cloud(cx, cy, 34);
-      }
-      ctx.restore();
-
-      ctx.fillStyle = "#4db84d";
-      ctx.fillRect(0, H - GROUND_H, W, GROUND_H);
-
-      ctx.fillStyle = "rgba(0,0,0,.12)";
-      const stripeW = 26;
-      for (let x = -((t * PIPE_SPEED) % stripeW); x < W; x += stripeW) {
-        ctx.fillRect(x, H - GROUND_H, 12, GROUND_H);
-      }
-    }
-
-    function drawPipe(x, y, w, h, upsideDown) {
-      const grad = ctx.createLinearGradient(x, 0, x + w, 0);
-      grad.addColorStop(0, "#1f9d3a");
-      grad.addColorStop(0.5, "#36d45c");
-      grad.addColorStop(1, "#1b7f31");
-      ctx.fillStyle = grad;
-      ctx.fillRect(x, y, w, h);
-
-      ctx.fillStyle = "rgba(255,255,255,.15)";
-      const rimH = 16;
-      if (upsideDown) ctx.fillRect(x - 4, y + h - rimH, w + 8, rimH);
-      else ctx.fillRect(x - 4, y, w + 8, rimH);
-
-      ctx.strokeStyle = "rgba(0,0,0,.25)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, w, h);
-    }
-
-    function drawPipes() {
-      for (const p of pipes) {
-        const x = p.x;
-        const topH = p.topH;
-        const botY = topH + PIPE_GAP;
-        const botH = (H - GROUND_H) - botY;
-        drawPipe(x, 0, PIPE_WIDTH, topH, true);
-        drawPipe(x, botY, PIPE_WIDTH, botH, false);
-      }
-    }
-
-    function drawBird() {
-      ctx.save();
-      ctx.translate(bird.x, bird.y);
-
-      bird.rot = Math.max(-0.45, Math.min(1.2, bird.vy * 0.08));
-      ctx.rotate(bird.rot);
-
-      ctx.fillStyle = "#ffd23c";
-      ctx.beginPath();
-      ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(0,0,0,.08)";
-      ctx.beginPath();
-      ctx.ellipse(-4, 3, 10, 7, 0.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(6, -5, 5.3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#1a1a1a";
-      ctx.beginPath();
-      ctx.arc(7.5, -5, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = "#ff7a00";
-      ctx.beginPath();
-      ctx.moveTo(12, 1);
-      ctx.lineTo(24, 5);
-      ctx.lineTo(12, 9);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = "rgba(0,0,0,.22)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 0, bird.r, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function roundRect(x, y, w, h, r) {
-      const rr = Math.min(r, w / 2, h / 2);
-      ctx.beginPath();
-      ctx.moveTo(x + rr, y);
-      ctx.arcTo(x + w, y, x + w, y + h, rr);
-      ctx.arcTo(x + w, y + h, x, y + h, rr);
-      ctx.arcTo(x, y + h, x, y, rr);
-      ctx.arcTo(x, y, x + w, y, rr);
-      ctx.closePath();
-    }
-
-    function drawOverlay() {
-      ctx.save();
-      ctx.fillStyle = "rgba(0,0,0,.25)";
-      ctx.fillRect(0, 0, W, H);
-
-      ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(255,255,255,.95)";
-      ctx.font = "700 42px system-ui";
-      const title =
-        state === State.GAMEOVER ? "Game Over" :
-        state === State.PAUSED ? "Paused" :
-        "Flappy Bird";
-      ctx.fillText(title, W / 2, 190);
-
-      ctx.font = "500 18px system-ui";
-      if (state === State.READY) {
-        ctx.fillText("Tap / Click / Space to start", W / 2, 235);
-      } else if (state === State.PAUSED) {
-        ctx.fillText("Math test is open", W / 2, 235);
-      } else {
-        ctx.fillText(`Score: ${score}   Best: ${best}`, W / 2, 235);
-        ctx.fillText("Press R or tap Restart", W / 2, 265);
-      }
-
-      ctx.fillStyle = "rgba(255,255,255,.12)";
-      roundRect(W / 2 - 140, 310, 280, 52, 14);
-      ctx.fill();
-
-      ctx.fillStyle = "rgba(255,255,255,.95)";
-      ctx.font = "600 16px system-ui";
-      ctx.fillText("Tip: keep short, steady taps", W / 2, 342);
-
-      ctx.restore();
-    }
-
-    // --- Game loop ---
-    let last = 0;
-    let t = 0;
-
-    function update(dt) {
-      t += dt;
-
-      if (state === State.PLAYING) {
-        bird.vy += GRAVITY;
-        bird.y += bird.vy;
-      } else {
-        bird.y = H * 0.45 + Math.sin(t * 0.004) * 10;
-      }
-
-      if (state === State.PLAYING) {
-        for (const p of pipes) p.x -= PIPE_SPEED;
-
-        const first = pipes[0];
-        if (first && first.x + PIPE_WIDTH < -10) {
-          pipes.shift();
-          const lastX = pipes[pipes.length - 1].x;
-          spawnPipe(lastX + PIPE_SPACING);
-        }
-
-        for (const p of pipes) {
-          if (!p.passed && p.x + PIPE_WIDTH < bird.x) {
-            p.passed = true;
-            score++;
-            scoreEl.textContent = score;
-          }
-        }
-
-        if (checkCollisions()) {
-          state = State.GAMEOVER;
-          best = Math.max(best, score);
-          localStorage.setItem("flappy_best", String(best));
-          vibrate(30);
-        }
-      }
-    }
-
-    function render() {
-      ctx.clearRect(0, 0, W, H);
-      drawBackground();
-      drawPipes();
-      drawBird();
-
-      ctx.save();
-      ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(255,255,255,.95)";
-      ctx.font = "800 44px system-ui";
-      if (state === State.PLAYING) ctx.fillText(score, W / 2, 92);
-      ctx.restore();
-
-      if (state !== State.PLAYING) drawOverlay();
-    }
-
-    function loop(ts) {
-      const dt = Math.min(32, ts - last);
-      last = ts;
-      update(dt);
-      render();
-      requestAnimationFrame(loop);
-    }
-
-    // --- Touch-friendly input ---
-    canvas.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      canvas.setPointerCapture?.(e.pointerId);
-      if (state !== State.GAMEOVER) {
-        flap();
-        vibrate(10);
-      }
-    }, { passive: false });
-
-    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-
-    window.addEventListener("keydown", (e) => {
-      if (modal.classList.contains("open")) {
-        if (e.key === "Escape") closeMath();
-        return;
-      }
-      if (e.code === "Space") { e.preventDefault(); flap(); }
-      if (e.key.toLowerCase() === "r") reset();
-    });
-
-    restartBtn.addEventListener("click", () => reset());
-
-    // -----------------------------
-    //          MATH TEST
-    // -----------------------------
-    let mathTotal = 5;
-    let mathIndex = 0;
-    let mathCorrect = 0;
-    let current = { a: 0, b: 0, op: "+", answer: 0 };
-
-    function makeQuestion() {
-      const op = Math.random() < 0.5 ? "+" : "-";
-      let a = Math.floor(rand(1, 21)); // 1..20
-      let b = Math.floor(rand(1, 21));
-      if (op === "-" && b > a) [a, b] = [b, a]; // keep it non-negative
-      const answer = op === "+" ? (a + b) : (a - b);
-      current = { a, b, op, answer };
-
-      qEl.textContent = `${a} ${op} ${b} = ?`;
-      ansEl.value = "";
-      ansEl.focus({ preventScroll: true });
-
-      qIndexEl.textContent = String(mathIndex + 1);
-      correctEl.textContent = String(mathCorrect);
-    }
-
-    function openMath() {
-      if (!modal.classList.contains("open")) {
-        prevStateBeforeModal = state;
-        state = State.PAUSED;
-
-        // new test each open
-        mathIndex = 0;
-        mathCorrect = 0;
-        feedbackEl.className = "status muted";
-        feedbackEl.textContent = "Solve 5 questions. (Addition/subtraction)";
-        makeQuestion();
-
-        modal.classList.add("open");
-      }
-    }
-
-    function closeMath() {
-      modal.classList.remove("open");
-      // resume what you were doing (READY/PLAYING/GAMEOVER)
-      state = prevStateBeforeModal === State.PLAYING ? State.PLAYING : prevStateBeforeModal;
-      canvas.focus?.();
-    }
-
-    function finishMath() {
-      const pct = Math.round((mathCorrect / mathTotal) * 100);
-      if (mathCorrect >= 4) {
-        feedbackEl.className = "status good";
-        feedbackEl.textContent = `Nice! You got ${mathCorrect}/${mathTotal} (${pct}%).`;
-        vibrate(20);
-      } else {
-        feedbackEl.className = "status bad";
-        feedbackEl.textContent = `Done: ${mathCorrect}/${mathTotal} (${pct}%). Try again!`;
-        vibrate(30);
-      }
-      // keep modal open; user can close or press Math again to restart
-    }
-
-    function submitMath() {
-      if (mathIndex >= mathTotal) return;
-
-      const val = ansEl.value.trim();
-      if (val === "") {
-        feedbackEl.className = "status bad";
-        feedbackEl.textContent = "Enter an answer (or press Skip).";
-        return;
-      }
-
-      const n = Number(val);
-      const ok = Number.isFinite(n) && n === current.answer;
-
-      if (ok) {
-        mathCorrect++;
-        feedbackEl.className = "status good";
-        feedbackEl.textContent = "Correct ✅";
-        vibrate(10);
-      } else {
-        feedbackEl.className = "status bad";
-        feedbackEl.textContent = `Nope ❌ (answer was ${current.answer})`;
-        vibrate(15);
-      }
-
-      mathIndex++;
-      correctEl.textContent = String(mathCorrect);
-
-      if (mathIndex >= mathTotal) {
-        qIndexEl.textContent = String(mathTotal);
-        finishMath();
-      } else {
-        setTimeout(makeQuestion, 350);
-      }
-    }
-
-    function skipMath() {
-      if (mathIndex >= mathTotal) return;
-      feedbackEl.className = "status muted";
-      feedbackEl.textContent = `Skipped (answer was ${current.answer})`;
-      mathIndex++;
-      if (mathIndex >= mathTotal) {
-        qIndexEl.textContent = String(mathTotal);
-        finishMath();
-      } else {
-        setTimeout(makeQuestion, 250);
-      }
-    }
-
-    mathBtn.addEventListener("click", openMath);
-    closeMathBtn.addEventListener("click", closeMath);
-    submitBtn.addEventListener("click", submitMath);
-    skipBtn.addEventListener("click", skipMath);
-
-    ansEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") submitMath();
-    });
-
-    // Clicking outside the card closes the modal (optional)
-    modal.addEventListener("pointerdown", (e) => {
-      if (e.target === modal) closeMath();
-    });
-
-    // --- Start ---
-    reset();
-    requestAnimationFrame(loop);
-  </script>
 </body>
 </html>
