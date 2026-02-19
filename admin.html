@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel (Demo)</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1733;
+      --card:#121c3d;
+      --line:rgba(255,255,255,.08);
+      --text:#eaf0ff;
+      --muted:rgba(234,240,255,.7);
+      --accent:#4f7cff;
+      --good:#25c26e;
+      --warn:#ffcc00;
+      --bad:#ff4d5e;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --radius2:12px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(79,124,255,.25), transparent 60%),
+        radial-gradient(900px 500px at 85% 20%, rgba(37,194,110,.18), transparent 55%),
+        radial-gradient(900px 600px at 60% 95%, rgba(255,77,94,.12), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+
+    /* Layout */
+    .app{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      min-height:100vh;
+    }
+    aside{
+      padding:18px;
+      border-right:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 30%);
+    }
+    main{
+      padding:18px;
+    }
+
+    /* Sidebar */
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-radius: var(--radius2);
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      margin-bottom:14px;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(79,124,255,.95), rgba(37,194,110,.85));
+      display:grid;place-items:center;font-weight:900;color:#08102a;
+    }
+    .brand h2{ margin:0; font-size:14px; line-height:1.2; }
+    .brand p{ margin:0; font-size:12px; color:var(--muted); }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:12px;
+    }
+    .nav button{
+      all: unset;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .nav button:hover{ background: rgba(255,255,255,.05); }
+    .nav button.active{
+      border-color: rgba(79,124,255,.7);
+      background: rgba(79,124,255,.12);
+    }
+    .tag{
+      font-size:12px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .sideFooter{
+      margin-top:18px;
+      padding-top:12px;
+      border-top:1px solid var(--line);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .logout{
+      margin-top:10px;
+      width:100%;
+      all:unset;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:12px;
+      background: rgba(255,77,94,.12);
+      border:1px solid rgba(255,77,94,.4);
+      color: var(--text);
+      text-align:center;
+      font-weight:700;
+    }
+    .logout:hover{ background: rgba(255,77,94,.18); }
+
+    /* Topbar */
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .search{
+      flex:1;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--line);
+    }
+    .search input{
+      all: unset;
+      flex:1;
+      color: var(--text);
+      font-size:14px;
+    }
+    .pill{
+      display:flex; gap:10px; align-items:center;
+      padding:10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      min-width: 220px;
+      justify-content:space-between;
+    }
+    .pill small{ color: var(--muted); display:block; }
+    .pill strong{ font-size:13px; }
+
+    /* Cards */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+    .card{
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHeader{
+      padding:14px 14px 0;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHeader h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .cardHeader p{
+      margin:6px 0 0;
+      font-size:12px;
+      color: var(--muted);
+    }
+    .cardBody{ padding:14px; }
+
+    .stat{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .big{
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:.4px;
+    }
+    .delta{
+      font-size:12px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color: var(--muted);
+    }
+    .delta.good{ border-color: rgba(37,194,110,.6); color: rgba(37,194,110,.9); background: rgba(37,194,110,.12); }
+    .delta.warn{ border-color: rgba(255,204,0,.5); color: rgba(255,204,0,.9); background: rgba(255,204,0,.10); }
+    .delta.bad{ border-color: rgba(255,77,94,.55); color: rgba(255,77,94,.9); background: rgba(255,77,94,.12); }
+
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:middle;
+    }
+    th{ color: var(--muted); font-weight:700; font-size:12px; }
+    .status{
+      font-size:12px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .dot{ width:8px;height:8px;border-radius:50%; background: var(--muted); }
+    .online .dot{ background: var(--good); }
+    .suspended .dot{ background: var(--bad); }
+    .pending .dot{ background: var(--warn); }
+
+    /* Buttons */
+    .btnRow{ display:flex; gap:10px; flex-wrap:wrap; }
+    .btn{
+      all:unset;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      font-weight:700;
+      font-size:13px;
+    }
+    .btn:hover{ background: rgba(255,255,255,.06); }
+    .btn.primary{
+      border-color: rgba(79,124,255,.65);
+      background: rgba(79,124,255,.18);
+    }
+    .btn.danger{
+      border-color: rgba(255,77,94,.55);
+      background: rgba(255,77,94,.14);
+    }
+
+    /* Fake chart */
+    .bars{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:8px;
+      align-items:end;
+      height:120px;
+      padding: 8px 0 2px;
+    }
+    .bar{
+      border-radius: 10px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(79,124,255,.6), rgba(79,124,255,.15));
+    }
+
+    /* Logs */
+    .log{
+      font-family: var(--mono);
+      font-size:12px;
+      line-height:1.5;
+      color: rgba(234,240,255,.85);
+      background: rgba(0,0,0,.25);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      max-height: 220px;
+      overflow:auto;
+      white-space:pre-wrap;
+    }
+
+    /* Forms */
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .field label{
+      display:block;
+      font-size:12px;
+      color: var(--muted);
+      margin-bottom:6px;
+      font-weight:700;
+    }
+    .field input, .field select{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      outline:none;
+    }
+    .field input:focus, .field select:focus{
+      border-color: rgba(79,124,255,.7);
+      box-shadow: 0 0 0 3px rgba(79,124,255,.18);
+    }
+
+    /* Modal */
+    .modalBackdrop{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      place-items:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modalBackdrop.show{ display:grid; }
+    .modal{
+      width:min(520px, 96vw);
+      border-radius: 18px;
+      background: rgba(18,28,61,.95);
+      border:1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+    }
+    .modalTop h3{ margin:0; font-size:14px; }
+    .x{
+      all:unset; cursor:pointer;
+      font-size:18px;
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+
+    /* Sections */
+    section{ display:none; }
+    section.active{ display:block; }
+
+    /* Responsive */
+    @media (max-width: 920px){
+      .app{ grid-template-columns: 1fr; }
+      aside{ border-right:0; border-bottom:1px solid var(--line); }
+      .pill{ min-width: 180px; }
+    }
+    @media (max-width: 620px){
+      .formGrid{ grid-template-columns: 1fr; }
+      .pill{ display:none; }
+      .grid{ gap:12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="logo">A</div>
+        <div>
+          <h2>Admin Panel</h2>
+          <p>Demo dashboard (fake)</p>
+        </div>
+      </div>
+
+      <div class="nav" id="nav">
+        <button class="active" data-target="dashboard">
+          <span>Dashboard</span><span class="tag">Home</span>
+        </button>
+        <button data-target="users">
+          <span>Users</span><span class="tag" id="userCountTag">0</span>
+        </button>
+        <button data-target="logs">
+          <span>Logs</span><span class="tag">Live</span>
+        </button>
+        <button data-target="settings">
+          <span>Settings</span><span class="tag">Config</span>
+        </button>
+      </div>
+
+      <div class="sideFooter">
+        <div>Signed in as <strong>admin</strong></div>
+        <button class="logout" id="logoutBtn">Log out</button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div class="search">
+          <span style="opacity:.8">🔎</span>
+          <input id="searchInput" placeholder="Search users or logs..." />
+        </div>
+        <div class="pill">
+          <div>
+            <small>Environment</small>
+            <strong>Demo / Local</strong>
+          </div>
+          <div style="font-family:var(--mono); font-size:12px; opacity:.9" id="clock">--:--:--</div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="active">
+        <div class="grid">
+          <div class="card" style="grid-column: span 4;">
+            <div class="cardHeader">
+              <div>
+                <h3>Total Users</h3>
+                <p>Mock database</p>
+              </div>
+              <span class="delta good" id="deltaUsers">+0%</span>
+            </div>
+            <div class="cardBody">
+              <div class="stat">
+                <div class="big" id="statUsers">0</div>
+                <div style="color:var(--muted); font-size:12px;">updated now</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column: span 4;">
+            <div class="cardHeader">
+              <div>
+                <h3>Active Sessions</h3>
+                <p>Simulated traffic</p>
+              </div>
+              <span class="delta warn" id="deltaSessions">~</span>
+            </div>
+            <div class="cardBody">
+              <div class="stat">
+                <div class="big" id="statSessions">0</div>
+                <div style="color:var(--muted); font-size:12px;">right now</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column: span 4;">
+            <div class="cardHeader">
+              <div>
+                <h3>System Health</h3>
+                <p>Fake uptime & status</p>
+              </div>
+              <span class="delta good" id="deltaHealth">OK</span>
+            </div>
+            <div class="cardBody">
+              <div class="stat">
+                <div class="big" id="statHealth">99.9%</div>
+                <div style="color:var(--muted); font-size:12px;">uptime</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column: span 7;">
+            <div class="cardHeader">
+              <div>
+                <h3>Weekly Activity</h3>
+                <p>Placeholder “chart”</p>
+              </div>
+              <div class="btnRow">
+                <button class="btn" id="regenChart">Regenerate</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="bars" id="bars"></div>
+              <div style="display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-top:8px;">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column: span 5;">
+            <div class="cardHeader">
+              <div>
+                <h3>Quick Actions</h3>
+                <p>Demo-only controls</p>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="btnRow">
+                <button class="btn primary" id="openAddUser">+ Add User</button>
+                <button class="btn" id="toggleHealth">Toggle Health</button>
+                <button class="btn danger" id="clearLogs">Clear Logs</button>
+              </div>
+              <div style="margin-top:12px; color:var(--muted); font-size:12px;">
+                These buttons just edit local fake data in the browser.
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="grid-column: span 12;">
+            <div class="cardHeader">
+              <div>
+                <h3>Recent Users</h3>
+                <p>Searchable, editable table</p>
+              </div>
+              <div class="btnRow">
+                <button class="btn" id="seedUsers">Seed Users</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div style="overflow:auto;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Role</th>
+                      <th style="width:170px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section id="users">
+        <div class="grid">
+          <div class="card" style="grid-column: span 12;">
+            <div class="cardHeader">
+              <div>
+                <h3>Users</h3>
+                <p>All users (fake)</p>
+              </div>
+              <div class="btnRow">
+                <button class="btn primary" id="openAddUser2">+ Add User</button>
+                <button class="btn" id="exportJson">Export JSON</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div style="overflow:auto;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Role</th>
+                      <th style="width:170px;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTbody2"></tbody>
+                </table>
+              </div>
+              <pre class="log" id="exportBox" style="margin-top:12px; display:none;"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGS -->
+      <section id="logs">
+        <div class="grid">
+          <div class="card" style="grid-column: span 12;">
+            <div class="cardHeader">
+              <div>
+                <h3>System Logs</h3>
+                <p>Simulated events streaming in</p>
+              </div>
+              <div class="btnRow">
+                <button class="btn" id="pauseLogs">Pause</button>
+                <button class="btn danger" id="clearLogs2">Clear</button>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="log" id="logBox"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings">
+        <div class="grid">
+          <div class="card" style="grid-column: span 12;">
+            <div class="cardHeader">
+              <div>
+                <h3>Settings</h3>
+                <p>Just UI — doesn’t save anywhere</p>
+              </div>
+            </div>
+            <div class="cardBody">
+              <div class="formGrid">
+                <div class="field">
+                  <label>Site Title</label>
+                  <input id="siteTitle" value="Admin Panel" />
+                </div>
+                <div class="field">
+                  <label>Default Role</label>
+                  <select id="defaultRole">
+                    <option>Viewer</option>
+                    <option selected>Admin</option>
+                    <option>Editor</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Maintenance Mode</label>
+                  <select id="maintenance">
+                    <option>No</option>
+                    <option>Yes</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Log Level</label>
+                  <select id="logLevel">
+                    <option>Info</option>
+                    <option>Warn</option>
+                    <option>Error</option>
+                    <option>Debug</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="btnRow" style="margin-top:12px;">
+                <button class="btn primary" id="saveSettings">Save</button>
+                <button class="btn" id="resetSettings">Reset</button>
+              </div>
+
+              <div id="settingsMsg" class="log" style="margin-top:12px; display:none;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modalBackdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modalTop">
+        <h3>Add User (Fake)</h3>
+        <button class="x" id="closeModal" aria-label="Close">✕</button>
+      </div>
+      <div class="cardBody">
+        <div class="formGrid">
+          <div class="field">
+            <label>Name</label>
+            <input id="newName" placeholder="Jane Doe" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input id="newEmail" placeholder="jane@example.com" />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="newStatus">
+              <option>online</option>
+              <option>pending</option>
+              <option>suspended</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select id="newRole">
+              <option>Viewer</option>
+              <option selected>Admin</option>
+              <option>Editor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btnRow" style="margin-top:12px; justify-content:flex-end;">
+          <button class="btn" id="cancelAdd">Cancel</button>
+          <button class="btn primary" id="confirmAdd">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------- Fake "auth" guard (optional) --------
+    // If you used the login page I gave earlier, you can set a flag in localStorage on success.
+    // For now, we allow access even without it.
+    // Example to enforce:
+    // if (localStorage.getItem("demo_authed") !== "true") location.href = "login.html";
+
+    const state = {
+      users: [],
+      logs: [],
+      logsPaused: false,
+      healthOk: true,
+      sessions: 7,
+      usersDelta: 4,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function nowTime() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      const ss = String(d.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    // -------- Clock --------
+    setInterval(() => { $("clock").textContent = nowTime(); }, 250);
+
+    // -------- Navigation --------
+    $("nav").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-target]");
+      if (!btn) return;
+      document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const target = btn.dataset.target;
+      document.querySelectorAll("main section").forEach(s => s.classList.remove("active"));
+      $(target).classList.add("active");
+    });
+
+    // -------- Fake chart --------
+    function regenBars(){
+      const el = $("bars");
+      el.innerHTML = "";
+      const vals = Array.from({length: 12}, () => Math.floor(20 + Math.random() * 90));
+      vals.forEach(v => {
+        const b = document.createElement("div");
+        b.className = "bar";
+        b.style.height = v + "px";
+        el.appendChild(b);
+      });
+    }
+    $("regenChart").addEventListener("click", regenBars);
+
+    // -------- Logs --------
+    function pushLog(line){
+      const entry = `[${nowTime()}] ${line}`;
+      state.logs.push(entry);
+      if (state.logs.length > 200) state.logs.shift();
+      renderLogs();
+    }
+
+    function renderLogs(){
+      const filter = $("searchInput").value.trim().toLowerCase();
+      const logs = state.logs.filter(l => l.toLowerCase().includes(filter));
+      $("logBox").textContent = logs.join("\n") || "(no logs yet)";
+    }
+
+    function randomLog(){
+      const msgs = [
+        "GET /api/users 200",
+        "POST /api/login 200",
+        "Cache miss: user_list",
+        "Worker heartbeat OK",
+        "DB connection pool stable",
+        "Rate limit warning on /api/auth",
+        "Permission check passed: admin",
+        "Audit: user updated profile",
+        "System cleanup completed",
+        "Suspicious request blocked (demo)",
+      ];
+      const m = msgs[Math.floor(Math.random() * msgs.length)];
+      pushLog(m);
+    }
+
+    setInterval(() => {
+      if (!state.logsPaused) randomLog();
+      // simulate sessions
+      state.sessions = Math.max(0, state.sessions + (Math.random() > 0.5 ? 1 : -1));
+      $("statSessions").textContent = state.sessions;
+      $("deltaSessions").textContent = state.sessions > 10 ? "High" : (state.sessions > 4 ? "Normal" : "Low");
+      $("deltaSessions").className = "delta " + (state.sessions > 10 ? "warn" : "good");
+    }, 1200);
+
+    $("pauseLogs").addEventListener("click", () => {
+      state.logsPaused = !state.logsPaused;
+      $("pauseLogs").textContent = state.logsPaused ? "Resume" : "Pause";
+      pushLog(state.logsPaused ? "Logs paused by admin" : "Logs resumed by admin");
+    });
+
+    $("clearLogs").addEventListener("click", () => { state.logs = []; renderLogs(); });
+    $("clearLogs2").addEventListener("click", () => { state.logs = []; renderLogs(); });
+
+    // -------- Users --------
+    function statusPill(status){
+      const cls = status === "online" ? "online" : status === "pending" ? "pending" : "suspended";
+      return `<span class="status ${cls}"><span class="dot"></span>${status}</span>`;
+    }
+
+    function renderUsers(){
+      const filter = $("searchInput").value.trim().toLowerCase();
+      const rows = state.users
+        .filter(u =>
+          (u.name + " " + u.email + " " + u.role + " " + u.status).toLowerCase().includes(filter)
+        )
+        .map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.name}</td>
+            <td>${u.email}</td>
+            <td>${statusPill(u.status)}</td>
+            <td>${u.role}</td>
+            <td>
+              <button class="btn" data-action="toggle" data-id="${u.id}">Toggle Status</button>
+              <button class="btn danger" data-action="delete" data-id="${u.id}">Delete</button>
+            </td>
+          </tr>
+        `).join("");
+
+      $("usersTbody").innerHTML = rows || `<tr><td colspan="6" style="color:var(--muted);">No users found.</td></tr>`;
+      $("usersTbody2").innerHTML = $("usersTbody").innerHTML;
+
+      $("statUsers").textContent = state.users.length;
+      $("userCountTag").textContent = state.users.length;
+      $("deltaUsers").textContent = `+${state.usersDelta}%`;
+    }
+
+    function addUser({name, email, status, role}){
+      const id = Math.floor(1000 + Math.random() * 9000);
+      state.users.unshift({ id, name, email, status, role });
+      pushLog(`User added: ${name} (${email})`);
+      renderUsers();
+    }
+
+    function seedUsers(){
+      const base = [
+        ["Alex Chen", "alex@example.com", "online", "Admin"],
+        ["Sam Rivera", "sam@example.com", "pending", "Editor"],
+        ["Taylor Kim", "taylor@example.com", "online", "Viewer"],
+        ["Jordan Lee", "jordan@example.com", "suspended", "Viewer"],
+        ["Morgan Patel", "morgan@example.com", "online", "Editor"]
+      ];
+      base.forEach(([n,e,s,r]) => addUser({name:n,email:e,status:s,role:r}));
+      state.usersDelta = 6 + Math.floor(Math.random() * 10);
+      renderUsers();
+    }
+
+    $("seedUsers").addEventListener("click", seedUsers);
+
+    function toggleUserStatus(id){
+      const u = state.users.find(x => String(x.id) === String(id));
+      if (!u) return;
+      u.status = (u.status === "online") ? "pending" : (u.status === "pending") ? "suspended" : "online";
+      pushLog(`User ${u.id} status -> ${u.status}`);
+      renderUsers();
+    }
+
+    function deleteUser(id){
+      const u = state.users.find(x => String(x.id) === String(id));
+      state.users = state.users.filter(x => String(x.id) !== String(id));
+      pushLog(`User deleted: ${u ? u.email : id}`);
+      renderUsers();
+    }
+
+    function usersTableHandler(e){
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      if (action === "toggle") toggleUserStatus(id);
+      if (action === "delete") deleteUser(id);
+    }
+
+    $("usersTbody").addEventListener("click", usersTableHandler);
+    $("usersTbody2").addEventListener("click", usersTableHandler);
+
+    $("searchInput").addEventListener("input", () => {
+      renderUsers();
+      renderLogs();
+    });
+
+    // -------- Health toggle --------
+    $("toggleHealth").addEventListener("click", () => {
+      state.healthOk = !state.healthOk;
+      $("deltaHealth").textContent = state.healthOk ? "OK" : "DEGRADED";
+      $("deltaHealth").className = "delta " + (state.healthOk ? "good" : "bad");
+      $("statHealth").textContent = state.healthOk ? "99.9%" : "96.4%";
+      pushLog(`Health toggled -> ${state.healthOk ? "OK" : "DEGRADED"}`);
+    });
+
+    // -------- Modal: Add user --------
+    function openModal(){
+      $("modalBackdrop").classList.add("show");
+      $("newName").focus();
+    }
+    function closeModal(){
+      $("modalBackdrop").classList.remove("show");
+    }
+    $("openAddUser").addEventListener("click", openModal);
+    $("openAddUser2").addEventListener("click", openModal);
+    $("closeModal").addEventListener("click", closeModal);
+    $("cancelAdd").addEventListener("click", closeModal);
+    $("modalBackdrop").addEventListener("click", (e) => {
+      if (e.target.id === "modalBackdrop") closeModal();
+    });
+
+    $("confirmAdd").addEventListener("click", () => {
+      const name = $("newName").value.trim() || "New User";
+      const email = $("newEmail").value.trim() || `user${Math.floor(Math.random()*999)}@example.com`;
+      const status = $("newStatus").value;
+      const role = $("newRole").value;
+      addUser({ name, email, status, role });
+      $("newName").value = "";
+      $("newEmail").value = "";
+      closeModal();
+    });
+
+    // -------- Export JSON --------
+    $("exportJson").addEventListener("click", () => {
+      const box = $("exportBox");
+      box.style.display = "block";
+      box.textContent = JSON.stringify(state.users, null, 2);
+      pushLog("Exported users JSON (demo)");
+    });
+
+    // -------- Settings --------
+    $("saveSettings").addEventListener("click", () => {
+      const title = $("siteTitle").value.trim() || "Admin Panel";
+      document.title = `${title} (Demo)`;
+      pushLog(`Settings saved: title="${title}", role="${$("defaultRole").value}"`);
+      $("settingsMsg").style.display = "block";
+      $("settingsMsg").textContent = `[${nowTime()}] Saved (demo only).`;
+    });
+
+    $("resetSettings").addEventListener("click", () => {
+      $("siteTitle").value = "Admin Panel";
+      $("defaultRole").value = "Admin";
+      $("maintenance").value = "No";
+      $("logLevel").value = "Info";
+      pushLog("Settings reset to defaults");
+      $("settingsMsg").style.display = "block";
+      $("settingsMsg").textContent = `[${nowTime()}] Reset (demo only).`;
+    });
+
+    // -------- Logout (demo) --------
+    $("logoutBtn").addEventListener("click", () => {
+      // If you used login, you can clear a flag:
+      // localStorage.removeItem("demo_authed");
+      pushLog("Logged out (demo)");
+      // redirect to login if you want:
+      // location.href = "login.html";
+      alert("Logged out (demo).");
+    });
+
+    // Init
+    regenBars();
+    seedUsers();
+    pushLog("Admin panel loaded");
+    renderUsers();
+    renderLogs();
+  </script>
+</body>
+</html>
